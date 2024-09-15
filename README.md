@@ -40,9 +40,9 @@ Before you begin, make sure you have the following installed:
 3. Record the API_ID and API_HASH provided after registering your application in the .env file.
 
 ## Installation
-You can download the [**repository**](https://github.com/HiddenCodeDevs/BlumTelegramBot) by cloning it to your system and installing the necessary dependencies:
+You can download the [**repository**](https://github.com/YarmolenkoD/boinkers) by cloning it to your system and installing the necessary dependencies:
 ```shell
-git clone https://github.com/HiddenCodeDevs/BlumTelegramBot.git
+git clone https://github.com/YarmolenkoD/boinkers.git
 cd BoinkersBot
 ```
 
@@ -71,9 +71,9 @@ python3 main.py
 
 You can also use arguments for quick start, for example:
 ```shell
-~/BlumTelegramBot >>> python3 main.py --action (1/2)
+~/boinkers >>> python3 main.py --action (1/2)
 # Or
-~/BlumTelegramBot >>> python3 main.py -a (1/2)
+~/boinkers >>> python3 main.py -a (1/2)
 
 # 1 - Run clicker
 # 2 - Creates a session
@@ -91,18 +91,10 @@ python main.py
 
 You can also use arguments for quick start, for example:
 ```shell
-~/BlumTelegramBot >>> python main.py --action (1/2)
+~/boinkers >>> python main.py --action (1/2)
 # Or
-~/BlumTelegramBot >>> python main.py -a (1/2)
+~/boinkers >>> python main.py -a (1/2)
 
 # 1 - Run clicker
 # 2 - Creates a session
 ```
-
-
-
-
-### Contacts
-
-For support or questions, contact me on Telegram: 
-[![Static Badge](https://img.shields.io/badge/telegram-bot_author-link?style=for-the-badge&logo=telegram&logoColor=white&logoSize=auto&color=blue)](https://t.me/unknxwnplxya)

@@ -10,16 +10,17 @@
 |                Многопоточность                 |       ✅        | 
 |            Привязка прокси к сессии            |       ✅        | 
 | Авто-регистрация аккаунта по вашей реф. ссылке |       ✅        |
-|     Авто игра с выбором рандомных поинтов      |       ✅        |
+|                   Авто-спины                   |       ✅        |
+|             Авто активация бустера             |       ✅        |
+|                   Авто таски                   |       ✅        |
+|             Авто апгрейд Боинкера              |       ✅        |
 |          Поддержка pyrogram .session           |       ✅        |
 
 
-## [Настройки](https://github.com/HiddenCodeDevs/BlumTelegramBot/blob/main/.env-example/)
+## [Настройки](https://github.com/YarmolenkoD/boinkers/blob/main/.env-example/)
 |        Настройки        |                                      Описание                                       |
 |:-----------------------:|:-----------------------------------------------------------------------------------:|
 |  **API_ID / API_HASH**  | Данные платформы, с которой будет запущена сессия Telegram (по умолчанию - android) |
-|     **PLAY_GAMES**      |            Играть в игры или просто запускать фарм (по умолчанию - True)            |
-|       **POINTS**        |       Кол-во очков за игру (по умолчанию - [190, 230] ((Тоесть от 190 до 230)       |
 |       **USE_REF**       |  Регистрировать ваши аккаунты по вашей реф. ссылке или нет (по умолчанию - False)   |
 |       **REF_ID**        |       Ваш реферальный аргумент (идет после app/startapp? в вашей реф. ссылке)       |
 | **USE_PROXY_FROM_FILE** |       Использовать ли прокси из файла `bot/config/proxies.txt` (True / False)       |
@@ -38,10 +39,10 @@
 3. Запишите `API_ID` и `API_HASH` в файле `.env`, предоставленные после регистрации вашего приложения.
 
 ## Установка
-Вы можете скачать [**Репозиторий**](https://github.com/HiddenCodeDevs/BlumTelegramBot) клонированием на вашу систему и установкой необходимых зависимостей:
+Вы можете скачать [**Репозиторий**](https://github.com/YarmolenkoD/boinkers) клонированием на вашу систему и установкой необходимых зависимостей:
 ```shell
-git clone https://github.com/HiddenCodeDevs/BlumTelegramBot.git
-cd BlumTelegramBot
+git clone https://github.com/YarmolenkoD/boinkers.git
+cd boinkers
 ```
 
 Затем для автоматической установки введите:
@@ -69,9 +70,9 @@ python3 main.py
 
 Также для быстрого запуска вы можете использовать аргументы, например:
 ```shell
-~/BlumTelegramBot >>> python3 main.py --action (1/2)
+~/boinkers >>> python3 main.py --action (1/2)
 # Or
-~/BlumTelegramBot >>> python3 main.py -a (1/2)
+~/boinkers >>> python3 main.py -a (1/2)
 
 # 1 - Запускает кликер
 # 2 - Создает сессию
@@ -90,19 +91,10 @@ python main.py
 
 Также для быстрого запуска вы можете использовать аргументы, например:
 ```shell
-~/BlumTelegramBot >>> python main.py --action (1/2)
+~/boinkers >>> python main.py --action (1/2)
 # Или
-~/BlumTelegramBot >>> python main.py -a (1/2)
+~/boinkers >>> python main.py -a (1/2)
 
 # 1 - Запускает кликер
 # 2 - Создает сессию
 ```
-
-
-
-
-### Контакты
-
-Для поддержки или вопросов, свяжитесь со мной в Telegram:
-
-[![Static Badge](https://img.shields.io/badge/Телеграм-автор_бота-link?style=for-the-badge&logo=telegram&logoColor=white&logoSize=auto&color=blue)](https://t.me/unknxwnplxya)

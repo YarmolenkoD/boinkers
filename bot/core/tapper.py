@@ -465,7 +465,8 @@ class Tapper:
                 await asyncio.sleep(delay=2)
                 if user_info is not None:
                     logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Level: <light-blue>{'{:,}'.format(user_info['boinkers']['currentBoinkerProgression']['level'])}</light-blue>")
-                    logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Coin Balance: <light-green>{'{:,}'.format(user_info['currencySoft'])}</light-green>")
+                    if 'currencySoft' in user_info:
+                        logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Coin Balance: <light-green>{'{:,}'.format(user_info['currencySoft'])}</light-green>")
 
                     if 'currencyCrypto' in user_info:
                         logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Shit Balance: <cyan>{'{:,.3f}'.format(user_info['currencyCrypto'])}</cyan>")
