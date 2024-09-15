@@ -249,6 +249,26 @@ class Tapper:
             self.error(f"Error occurred during claim booster: {e}")
             return False
 
+    async def spin_wheel_fortune(self, http_client: aiohttp.ClientSession):
+        try:
+            resp = await http_client.post(
+                f"https://boink.astronomica.io/api/play/spinWheelOfFortune?p=android",
+                ssl=False
+            )
+
+            data = await resp.json()
+
+            if resp.status == 200:
+                logger.info(f"<light-yellow>{self.session_name}</light-yellow> Wheel of Fortune | Prize: <magenta>{data['prize']['prizeName']}</magenta> - <light-green>{data['prize']['prizeValue']}</light-green>")
+                return True
+            else:
+                return False
+
+            return True
+        except Exception as e:
+            self.error(f"Error occurred during spin wheel of fortune: {e}")
+            return False
+
     async def spin_slot_machine(self, http_client: aiohttp.ClientSession, spins: int):
         spin_amounts = [150, 50, 25, 10, 5, 1]
         remaining_spins = spins
@@ -427,6 +447,7 @@ class Tapper:
         access_token = None
         refresh_token = None
         login_need = True
+        spin_wheel_fortune = True
 
         proxy_conn = ProxyConnector().from_url(proxy) if proxy else None
 
@@ -491,6 +512,11 @@ class Tapper:
                     if spins > 0:
                         await self.spin_slot_machine(http_client=http_client, spins=spins)
                         await asyncio.sleep(delay=4)
+
+
+                    if spin_wheel_fortune == True:
+                        await self.spin_wheel_fortune(http_client=http_client)
+                        spin_wheel_fortune = False
 
                     await self.perform_rewarded_actions(http_client=http_client)
                     await asyncio.sleep(delay=4)
