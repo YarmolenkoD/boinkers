@@ -16,10 +16,11 @@
 |                 Auto claim booster                 |     ✅     |
 |                     Auto tasks                     |     ✅     |
 |                Auto upgrade boinker                |     ✅     |
+|             Auto spin wheel of fortune             |     ✅     |
 |           Support for pyrogram .session            |     ✅     |
 
 
-## [Settings](https://github.com/HiddenCodeDevs/BlumTelegramBot/blob/main/.env-example/)
+## [Settings](https://github.com/YarmolenkoD/boinkers/blob/main/.env-example/)
 |        Settings         |                                 Description                                  |
 |:-----------------------:|:----------------------------------------------------------------------------:|
 |  **API_ID / API_HASH**  |   Platform data from which to run the Telegram session (default - android)   |

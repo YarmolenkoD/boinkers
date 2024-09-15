@@ -9,6 +9,18 @@ class Settings(BaseSettings):
     USE_REF: bool = True
     REF_ID: str = 'boink355876562'
 
+    BLACK_LIST_TASKS: list[str] = [
+         'twitterQuotePost20',
+         'telegramShareStory5',
+         'emojiOnPostTelegramNewsChannel',
+         'NotGoldReward',
+         'NotPlatinumReward',
+         'connectTonWallet',
+         'telegramJoinBoinkersNewsChannel',
+         'telegramJoinAcidGames',
+         'inviteAFriend'
+    ]
+
     USE_PROXY_FROM_FILE: bool = True
 
 

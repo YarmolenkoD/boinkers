@@ -309,17 +309,7 @@ class Tapper:
     async def perform_rewarded_actions(self, http_client: aiohttp.ClientSession):
         get_rewarded_action_list_url = "https://boink.astronomica.io/api/rewardedActions/getRewardedActionList?p=android"
 
-        skipped_tasks = [
-            'twitterQuotePost20',
-            'telegramShareStory5',
-            'emojiOnPostTelegramNewsChannel',
-            'NotGoldReward',
-            'NotPlatinumReward',
-            'connectTonWallet',
-            'telegramJoinBoinkersNewsChannel',
-            'telegramJoinAcidGames',
-            'inviteAFriend'
-        ]
+        skipped_tasks = settings.BLACK_LIST_TASKS
 
         try:
             # Fetch user info
@@ -337,9 +327,8 @@ class Tapper:
             for action in rewarded_actions:
                 name_id = action['nameId']
 
-
                 if name_id in skipped_tasks:
-                    logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Skipping task: {name_id}")
+#                     logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Skipping task: {name_id}")
                     continue
 
                 current_time = datetime.now(timezone.utc)
