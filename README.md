@@ -1,3 +1,5 @@
+# 💩 AUTO FARM FOR BOINKERS 💩
+
 ## Recommendation before use
 
 # 🔥🔥 PYTHON version must be 3.10 🔥🔥
