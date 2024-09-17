@@ -99,9 +99,6 @@ async def process() -> None:
     elif action == 2:
         await register_sessions()
 
-
-
-
 async def run_tasks(tg_clients: list[Client]):
     proxies = get_proxies()
     proxies_cycle = cycle(proxies) if proxies else None

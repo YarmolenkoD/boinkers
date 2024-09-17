@@ -20,10 +20,12 @@ from .agents import generate_random_user_agent
 from bot.config import settings
 
 from bot.utils import logger
+from bot.utils.logger import SelfTGClient
 from bot.exceptions import InvalidSession
 from .headers import headers
 from .helper import format_duration
 
+self_tg_client = SelfTGClient()
 
 class Tapper:
     def __init__(self, tg_client: Client):
@@ -142,13 +144,13 @@ class Tapper:
             peer = await self.tg_client.resolve_peer('boinker_bot')
             InputBotApp = types.InputBotAppShortName(bot_id=peer, short_name="boinkapp")
 
-            web_view = await self.tg_client.invoke(RequestAppWebView(
+            web_view = await self_tg_client.invoke(RequestAppWebView(
                 peer=peer,
                 app=InputBotApp,
                 platform='android',
                 write_allowed=True,
                 start_param=self.start_param
-            ))
+            ), self)
 
             auth_url = web_view.url
 
@@ -258,7 +260,7 @@ class Tapper:
 
             data = await resp.json()
 
-            if resp.status == 200:
+            if resp.status == 200 and 'prizeName' in data['prize']:
                 logger.info(f"<light-yellow>{self.session_name}</light-yellow> Wheel of Fortune | Prize: <magenta>{data['prize']['prizeName']}</magenta> - <light-green>{data['prize']['prizeValue']}</light-green>")
                 return True
             else:
