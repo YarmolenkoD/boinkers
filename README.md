@@ -27,6 +27,7 @@
 |     **PLAY_GAMES**      |              Play games or just start farming (default is True)              |
 |       **USE_REF**       |         Register accounts with ur referral or not (default - False)          |
 |       **REF_ID**        |   Your referral argument (comes after app/startapp? in your referral link)   |
+|  **BLACK_LIST_TASKS**   |                          List of tasks to skip                          |
 | **USE_PROXY_FROM_FILE** | Whether to use a proxy from the `bot/config/proxies.txt` file (True / False) |
 
 ## Quick Start 📚

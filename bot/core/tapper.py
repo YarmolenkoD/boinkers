@@ -479,7 +479,7 @@ class Tapper:
                         logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Coin Balance: <light-green>{'{:,}'.format(user_info['currencySoft'])}</light-green>")
 
                     if 'currencyCrypto' in user_info:
-                        logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Shit Balance: <cyan>{'{:,.3f}'.format(user_info['currencyCrypto'])}</cyan>")
+                        logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Shit Balance: 💩 <cyan>{'{:,.3f}'.format(user_info['currencyCrypto'])}</cyan> 💩")
 
                     current_time = datetime.now(timezone.utc)
 
