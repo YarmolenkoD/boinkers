@@ -147,7 +147,7 @@ class Tapper:
                 app=InputBotApp,
                 platform='android',
                 write_allowed=True,
-                start_param='boink355876562'
+                start_param=self.start_param
             ))
 
             auth_url = web_view.url
