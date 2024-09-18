@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     USE_REF: bool = True
     REF_ID: str = 'boink355876562'
 
+    USE_RANDOM_DELAY_IN_RUN: bool = True
+    RANDOM_DELAY_IN_RUN: list[int] = [5, 30]
+
     BLACK_LIST_TASKS: list[str] = [
          'twitterQuotePost20',
          'telegramShareStory5',

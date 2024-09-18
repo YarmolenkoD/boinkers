@@ -440,6 +440,11 @@ class Tapper:
             logger.error(f"<light-yellow>{self.session_name}</light-yellow> | Proxy: {proxy} | Error: {error}")
 
     async def run(self, proxy: str | None) -> None:
+        if settings.USE_RANDOM_DELAY_IN_RUN:
+            random_delay = random.randint(settings.RANDOM_DELAY_IN_RUN[0], settings.RANDOM_DELAY_IN_RUN[1])
+            logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Bot will start in <ly>{random_delay}s</ly>")
+            await asyncio.sleep(random_delay)
+
         access_token = None
         refresh_token = None
         login_need = True
