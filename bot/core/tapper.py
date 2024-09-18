@@ -569,22 +569,22 @@ class Tapper:
                             logger.success(f"<light-yellow>{self.session_name}</light-yellow> | 🚀 Claimed boost successfully 🚀")
                             await asyncio.sleep(delay=4)
 
-#                     spin_user = await self.get_user_info(http_client=http_client)
-#                     spins = spin_user['gamesEnergy']['slotMachine']['energy']
-#                     logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Spins: <light-blue>{spins}</light-blue>")
-#                     if spins > 0:
-#                         await self.spin_slot_machine(http_client=http_client, spins=spins)
-#                         await asyncio.sleep(delay=4)
+                    if spin_wheel_fortune == True:
+                        await self.spin_wheel_fortune(http_client=http_client)
+                        spin_wheel_fortune = False
 
-#                     if spin_wheel_fortune == True:
-#                         await self.spin_wheel_fortune(http_client=http_client)
-#                         spin_wheel_fortune = False
-#
-#                     await self.perform_rewarded_actions(http_client=http_client)
-#                     await asyncio.sleep(delay=4)
+                    await self.perform_rewarded_actions(http_client=http_client)
+                    await asyncio.sleep(delay=4)
 
                     await self.claim_friend_reward(http_client=http_client)
                     await asyncio.sleep(delay=4)
+
+                    spin_user = await self.get_user_info(http_client=http_client)
+                    spins = spin_user['gamesEnergy']['slotMachine']['energy']
+                    logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Spins: <light-blue>{spins}</light-blue>")
+                    if spins > 0:
+                        await self.spin_slot_machine(http_client=http_client, spins=spins)
+                        await asyncio.sleep(delay=4)
 
                     upgrade_success = True
                     while upgrade_success:
