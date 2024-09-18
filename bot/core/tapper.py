@@ -214,7 +214,7 @@ class Tapper:
              data = await resp.json()
 
              if resp.status == 200 and data:
-                 logger.success(f"<light-yellow>{self.session_name}</light-yellow> Upgrade Boinker | Coin: <light-yellow>{'{:,}'.format(data['newSoftCurrencyAmount'])}</light-yellow> | Spin: <light-blue>{data['newSlotMachineEnergy']}</light-blue> | Rank: <magenta>{data['rank']}</magenta>")
+                 logger.success(f"<light-yellow>{self.session_name}</light-yellow> Upgrade Boinker | Coins: <light-yellow>{'{:,}'.format(data['newSoftCurrencyAmount'])}</light-yellow> | Spins: <light-blue>{data['newSlotMachineEnergy']}</light-blue> | Rank: <magenta>{data['rank']}</magenta>")
                  return True
              else:
                  logger.info(f"<light-yellow>{self.session_name}</light-yellow> Upgrade Boinker | Not enough coins | Status: <magenta>{resp.status}</magenta>")
