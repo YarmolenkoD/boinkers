@@ -446,12 +446,11 @@ class Tapper:
                         logger.error(f"<light-yellow>{self.session_name}</light-yellow> | Error performing task {name_id}: {click_error}")
                         continue
 
-                    logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Waiting 2 seconds before claiming reward...")
-
+                    logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Waiting 10 seconds before claiming reward...")
                     await asyncio.sleep(10)
 
-                    claim_url = f"https://boink.astronomica.io/api/rewardedActions/claimRewardedAction/{name_id}?p=android"
                     try:
+                        claim_url = f"https://boink.astronomica.io/api/rewardedActions/claimRewardedAction/{name_id}?p=android"
                         async with http_client.post(claim_url, ssl=False) as claim_response:
                             if claim_response.status == 200:
                                 result = await claim_response.json()

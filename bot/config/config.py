@@ -16,6 +16,7 @@ class Settings(BaseSettings):
          'twitterQuotePost20',
          'telegramShareStory5',
          'emojiOnPostTelegramNewsChannel',
+         'emojiOnPostTelegramNewsChannel3',
          'NotGoldReward',
          'NotPlatinumReward',
          'connectTonWallet',
