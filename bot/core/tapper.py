@@ -328,8 +328,11 @@ class Tapper:
                 for friend in friends_invited:
                     curr_friend_id = friend['_id']
                     curr_friend_username = friend['userName']
-                    curr_friend_boinker_level = friend['boinkers']['completedBoinkers'] or 0
+                    curr_friend_boinker_level = 0
                     already_claimed_reward_level = 0
+
+                    if 'completedBoinkers' in friend['boinkers']:
+                        curr_friend_boinker_level = friend['boinkers']['completedBoinkers']
 
                     if curr_friend_boinker_level == 0:
                         continue
