@@ -12,16 +12,22 @@ class Settings(BaseSettings):
     USE_RANDOM_DELAY_IN_RUN: bool = True
     RANDOM_DELAY_IN_RUN: list[int] = [5, 30]
 
+    AD_TASK_PREFIX: str = 'AdTask'
+
     BLACK_LIST_TASKS: list[str] = [
-         'twitterQuotePost20',
-         'telegramShareStory5',
+         'telegramShareStory',
          'emojiOnPostTelegramNewsChannel',
-         'emojiOnPostTelegramNewsChannel3',
          'NotGoldReward',
          'NotPlatinumReward',
          'connectTonWallet',
          'telegramJoinBoinkersNewsChannel',
+         'telegramBoost',
          'telegramJoinAcidGames',
+         'AnimalsAndCoins',
+         'AnimalsAndCoinsIsland',
+         'AnimalsAndCoinsInstall',
+         'playCornBattle',
+         'NBPSep',
          'inviteAFriend'
     ]
 

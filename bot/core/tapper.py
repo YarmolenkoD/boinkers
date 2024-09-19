@@ -394,15 +394,20 @@ class Tapper:
                     return
                 rewarded_actions = await response.json()
 
-            # Process each action
             if rewarded_actions is None:
                 return False
 
             for action in rewarded_actions:
                 name_id = action['nameId']
 
-                if name_id in skipped_tasks:
-#                     logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Skipping task: {name_id}")
+                is_exist_in_black_list = any(item.lower() in name_id.lower() for item in skipped_tasks)
+                if is_exist_in_black_list:
+#                     logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Skipping task: {name_id} | Because it's on the blacklist")
+                    continue
+
+                # Skip all tasks that have conditions to join a telegram channel or group
+                if 'verification' in action and 'paramKey' in action['verification'] and action['verification']['paramKey'] == 'joinedChat':
+#                     logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Skipping task: {name_id} | Because you need to join the group or channel.")
                     continue
 
                 current_time = datetime.now(timezone.utc)
@@ -410,44 +415,67 @@ class Tapper:
                 wait_time = None
 
                 if user_info.get('rewardedActions', {}).get(name_id):
-                    last_claim_time = current_time
-                    if 'claimDateTime' in user_info['rewardedActions'][name_id]:
-                        last_claim_time = parser.isoparse(user_info['rewardedActions'][name_id]['claimDateTime'])
+                    last_claim_time = None
+                    last_click_time = None
+                    next_available_time = None
+                    seconds_to_claim_again = None
 
-                    if name_id == 'SeveralHourlsReward':
-                        next_available_time = last_claim_time + timedelta(hours=6)
-                        if current_time < next_available_time:
-                            can_perform_task = False
-                            wait_time = next_available_time
-                    elif name_id in ['SeveralHourlsRewardedAdTask', 'SeveralHourlsRewardedAdTask2']:
-                        next_available_time = last_claim_time + timedelta(minutes=6)
-                        if current_time < next_available_time:
-                            can_perform_task = False
-                            wait_time = next_available_time
-                    else:
+                    curr_reward = user_info['rewardedActions'][name_id]
+
+                    if 'secondsToClaimAgain' in action and action['secondsToClaimAgain'] != 0:
+                        seconds_to_claim_again = action['secondsToClaimAgain']
+
+                    if 'claimDateTime' in curr_reward:
+                        last_claim_time = parser.isoparse(curr_reward['claimDateTime'])
+
+                    if 'clickDateTime' in curr_reward and curr_reward['clickDateTime'] != None:
+                        last_click_time = parser.isoparse(curr_reward['clickDateTime'])
+
+                    if seconds_to_claim_again != None:
+                        next_available_time = current_time
+                        if last_claim_time != None:
+                            next_available_time = last_claim_time + timedelta(seconds=seconds_to_claim_again)
+                            if current_time < next_available_time:
+                                can_perform_task = False
+                                wait_time = next_available_time
+                            else:
+                                can_perform_task = True
+                    elif last_claim_time != None:
                         can_perform_task = False
+                    else:
+                        can_perform_task = True
 
                 if not can_perform_task:
-#                     if wait_time:
-#                         wait_minutes = (wait_time - current_time).seconds
-#                         logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Need to wait {wait_minutes} seconds to perform task {name_id}")
+                    if wait_time:
+                        wait_seconds = (wait_time - current_time).seconds
+#                         logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Need to wait {wait_seconds} seconds to perform task {name_id}")
                     continue
 
-                if name_id in ['SeveralHourlsRewardedAdTask', 'SeveralHourlsRewardedAdTask2']:
-                    provider_id = 'adsgram' if name_id == 'SeveralHourlsRewardedAdTask' else 'onclicka'
-                    await self.handle_ad_task(http_client=http_client, name_id=name_id, provider_id=provider_id)  # Assuming you have a function to handle this
+                if settings.AD_TASK_PREFIX.lower() in name_id.lower():
+                    provider_id = 'adsgram'
+
+                    if 'verification' in action and 'paramKey' in action['verification']:
+                        provider_id = action['verification']['paramKey']
+
+                    await self.handle_ad_task(http_client=http_client, name_id=name_id, provider_id=provider_id, action=action)  # Assuming you have a function to handle this
                 else:
                     click_url = f"https://boink.astronomica.io/api/rewardedActions/rewardedActionClicked/{name_id}?p=android"
                     try:
                         async with http_client.post(click_url, ssl=False) as click_response:
+                            click_result = await click_response.json()
                             logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Performed task {name_id}. Status: pending")
 
                     except Exception as click_error:
-                        logger.error(f"<light-yellow>{self.session_name}</light-yellow> | Error performing task {name_id}: {click_error}")
+                        logger.error(f"<light-yellow>{self.session_name}</light-yellow> | 😢 Error performing task {name_id}: {click_error}")
                         continue
 
-                    logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Waiting 10 seconds before claiming reward...")
-                    await asyncio.sleep(10)
+                    seconds_to_allow_claim = 10
+
+                    if 'secondsToAllowClaim' in action:
+                        seconds_to_allow_claim = action['secondsToAllowClaim']
+
+                    logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Waiting {seconds_to_allow_claim} seconds before claiming reward...")
+                    await asyncio.sleep(seconds_to_allow_claim)
 
                     try:
                         claim_url = f"https://boink.astronomica.io/api/rewardedActions/claimRewardedAction/{name_id}?p=android"
@@ -455,33 +483,40 @@ class Tapper:
                             if claim_response.status == 200:
                                 result = await claim_response.json()
                                 reward = result['prizeGotten']
-                                logger.success(f"<light-yellow>{self.session_name}</light-yellow> | Successfully completed task {name_id} | Reward: <light-green>{reward}</light-green>")
+                                logger.success(f"<light-yellow>{self.session_name}</light-yellow> | Successfully completed task {name_id} | Reward: 💰<light-green>{reward}</light-green> 💰")
                             else:
                                 logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Failed to claim reward for {name_id}. Status code: <light-red>{claim_response.status}</light-red>")
                     except Exception as claim_error:
-                        logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Error claiming reward for {name_id}: {claim_error}")
-
+                        logger.info(f"<light-yellow>{self.session_name}</light-yellow> | 😢 Error claiming reward for {name_id}: {claim_error}")
+                        break
 
                 await asyncio.sleep(1)
 
         except Exception as error:
-            logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Error performing tasks: {error}")
+            logger.info(f"<light-yellow>{self.session_name}</light-yellow> | 😢 Error performing tasks: {error}")
 
-    async def handle_ad_task(self, http_client: aiohttp.ClientSession, name_id, provider_id):
+    async def handle_ad_task(self, http_client: aiohttp.ClientSession, name_id, provider_id, action):
         try:
             # Click the ad task
             click_url = f"https://boink.astronomica.io/api/rewardedActions/rewardedActionClicked/{name_id}?p=android"
             await http_client.post(click_url, ssl=False)
             logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Ad task {name_id} clicked successfully")
 
-            await asyncio.sleep(15)
+            logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Watching 5 seconds before close ad...")
+            await asyncio.sleep(5)
 
             # Confirm ad watched
             ad_watched_url = "https://boink.astronomica.io/api/rewardedActions/ad-watched?p=android"
             await http_client.post(ad_watched_url, json={"providerId": provider_id}, ssl=False)
             logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Ad watched for {name_id} confirmed")
 
-            await asyncio.sleep(20)
+            seconds_to_allow_claim = 20
+
+            if 'secondsToAllowClaim' in action:
+                seconds_to_allow_claim = action['secondsToAllowClaim']
+
+            logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Waiting {seconds_to_allow_claim} seconds before claiming ad reward...")
+            await asyncio.sleep(seconds_to_allow_claim)
 
             # Claim the reward
             claim_url = f"https://boink.astronomica.io/api/rewardedActions/claimRewardedAction/{name_id}?p=android"
@@ -490,12 +525,12 @@ class Tapper:
                 if claim_response.status == 200:
                     result = await claim_response.json()
                     reward = result.get('prizeGotten')
-                    logger.success(f"<light-yellow>{self.session_name}</light-yellow> | Successfully completed ad task {name_id} | Reward: {reward}")
+                    logger.success(f"<light-yellow>{self.session_name}</light-yellow> | Successfully completed ad task {name_id} | Reward: 💰<light-green>{reward}</light-green> 💰")
                 else:
-                    logger.error(f"<light-yellow>{self.session_name}</light-yellow> | Failed to claim reward for ad task {name_id}. Status code: {claim_response.status}")
+                    logger.error(f"<light-yellow>{self.session_name}</light-yellow> | 😢 Failed to claim reward for ad task {name_id}. Status code: {claim_response.status}")
 
         except Exception as error:
-            logger.error(f"<light-yellow>{self.session_name}</light-yellow> | Error handling ad task {name_id}: {error}")
+            logger.error(f"<light-yellow>{self.session_name}</light-yellow> | 😢 Error handling ad task {name_id}: {error}")
 
     async def check_proxy(self, http_client: aiohttp.ClientSession, proxy: Proxy) -> None:
         try:
@@ -503,7 +538,7 @@ class Tapper:
             ip = (await response.json()).get('origin')
             logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Proxy IP: {ip}")
         except Exception as error:
-            logger.error(f"<light-yellow>{self.session_name}</light-yellow> | Proxy: {proxy} | Error: {error}")
+            logger.error(f"<light-yellow>{self.session_name}</light-yellow> | Proxy: {proxy} | 😢 Error: {error}")
 
     async def run(self, proxy: str | None) -> None:
         if settings.USE_RANDOM_DELAY_IN_RUN:
@@ -545,7 +580,7 @@ class Tapper:
 
             except Exception as error:
                 logger.error(
-                    f"<light-yellow>{self.session_name}</light-yellow> | Unknown error during login: {error}")
+                    f"<light-yellow>{self.session_name}</light-yellow> | 😢 Unknown error during login: {error}")
                 await asyncio.sleep(delay=3)
 
             try:
@@ -598,10 +633,10 @@ class Tapper:
 
             except Exception as error:
                 logger.error(
-                    f"<light-yellow>{self.session_name}</light-yellow> | Unknown error: {error}")
+                    f"<light-yellow>{self.session_name}</light-yellow> | 😢 Unknown error: {error}")
 
 async def run_tapper(tg_client: Client, proxy: str | None):
     try:
         await Tapper(tg_client=tg_client).run(proxy=proxy)
     except InvalidSession:
-        logger.error(f"{tg_client.name} | Invalid Session")
+        logger.error(f"{tg_client.name} | 😢 Invalid Session 😢")
