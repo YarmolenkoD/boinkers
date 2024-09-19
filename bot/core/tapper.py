@@ -448,7 +448,7 @@ class Tapper:
                 if not can_perform_task:
                     if wait_time:
                         wait_seconds = (wait_time - current_time).seconds
-#                         logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Need to wait {wait_seconds} seconds to perform task {name_id}")
+                        logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Need to wait {wait_seconds} seconds to perform task {name_id}")
                     continue
 
                 if settings.AD_TASK_PREFIX.lower() in name_id.lower():
@@ -474,7 +474,11 @@ class Tapper:
                     if 'secondsToAllowClaim' in action:
                         seconds_to_allow_claim = action['secondsToAllowClaim']
 
-                    logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Waiting {seconds_to_allow_claim} seconds before claiming reward...")
+                    if seconds_to_allow_claim > 60:
+                        logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Need to wait {seconds_to_allow_claim} seconds to perform task {name_id}")
+                        continue
+
+                    logger.info(f"<light-yellow>{self.session_name}</light-yellow> | 💤 Waiting {seconds_to_allow_claim} seconds before claiming reward... 💤")
                     await asyncio.sleep(seconds_to_allow_claim)
 
                     try:
@@ -482,8 +486,9 @@ class Tapper:
                         async with http_client.post(claim_url, ssl=False) as claim_response:
                             if claim_response.status == 200:
                                 result = await claim_response.json()
-                                reward = result['prizeGotten']
-                                logger.success(f"<light-yellow>{self.session_name}</light-yellow> | Successfully completed task {name_id} | Reward: 💰<light-green>{reward}</light-green> 💰")
+                                if result != None and 'prizeGotten' in result:
+                                    reward = result['prizeGotten']
+                                    logger.success(f"<light-yellow>{self.session_name}</light-yellow> | Successfully completed task {name_id} | Reward: 💰<light-green>{reward}</light-green> 💰")
                             else:
                                 logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Failed to claim reward for {name_id}. Status code: <light-red>{claim_response.status}</light-red>")
                     except Exception as claim_error:
@@ -500,22 +505,23 @@ class Tapper:
             # Click the ad task
             click_url = f"https://boink.astronomica.io/api/rewardedActions/rewardedActionClicked/{name_id}?p=android"
             await http_client.post(click_url, ssl=False)
+
             logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Ad task {name_id} clicked successfully")
 
-            logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Watching 5 seconds before close ad...")
+            logger.info(f"<light-yellow>{self.session_name}</light-yellow> | 💤 Sleep 5 seconds before close ad... 💤")
             await asyncio.sleep(5)
 
             # Confirm ad watched
             ad_watched_url = "https://boink.astronomica.io/api/rewardedActions/ad-watched?p=android"
             await http_client.post(ad_watched_url, json={"providerId": provider_id}, ssl=False)
-            logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Ad watched for {name_id} confirmed")
+            logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Ad task {name_id} watched successfully")
 
-            seconds_to_allow_claim = 20
+            seconds_to_allow_claim = 25
 
             if 'secondsToAllowClaim' in action:
-                seconds_to_allow_claim = action['secondsToAllowClaim']
+                seconds_to_allow_claim = action['secondsToAllowClaim'] + 5
 
-            logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Waiting {seconds_to_allow_claim} seconds before claiming ad reward...")
+            logger.info(f"<light-yellow>{self.session_name}</light-yellow> | 💤 Sleep {seconds_to_allow_claim} seconds before claiming ad reward... 💤")
             await asyncio.sleep(seconds_to_allow_claim)
 
             # Claim the reward
