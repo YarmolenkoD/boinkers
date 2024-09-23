@@ -634,8 +634,8 @@ class Tapper:
                         upgrade_success = await self.upgrade_boinker(http_client=http_client)
                         await asyncio.sleep(delay=3)
 
-                logger.info(f"<light-yellow>{self.session_name}</light-yellow> | 💤 sleep 600 seconds 💤")
-                await asyncio.sleep(delay=600)
+                logger.info(f"<light-yellow>{self.session_name}</light-yellow> | 💤 sleep 30 minutes 💤")
+                await asyncio.sleep(delay=1800)
 
             except Exception as error:
                 logger.error(
