@@ -28,7 +28,8 @@ class Settings(BaseSettings):
          'AnimalsAndCoinsInstall',
          'playCornBattle',
          'NBPSep',
-         'inviteAFriend'
+         'inviteAFriend',
+         'MergePalsQuests'
     ]
 
     USE_PROXY_FROM_FILE: bool = True
