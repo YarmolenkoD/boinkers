@@ -285,14 +285,21 @@ class Tapper:
                 spin_amount = next((amount for amount in spin_amounts if amount <= remaining_spins), 1)
 
                 resp = await http_client.post(
-                    f"https://boink.astronomica.io/api/play/spinSlotMachine/${spin_amount}?p=android",
-                    ssl=False
+                    f"https://boink.astronomica.io/api/play/spinSlotMachine/{spin_amount}?p=android",
+                    ssl=False,
+                    json={}
                 )
 
                 if resp.status == 200:
                     data = await resp.json()
                     logger.success(f"<light-yellow>{self.session_name}</light-yellow> | Spin prize: <light-blue>{data['prize']['prizeTypeName']}</light-blue> - <light-green>{data['prize']['prizeValue']}</light-green>")
-                    remaining_spins -= spin_amount
+
+                    await asyncio.sleep(delay=random.randint(1, 4))
+
+                    curr_user = await self.get_user_info(http_client=http_client)
+                    curr_spins = curr_user['gamesEnergy']['slotMachine']['energy']
+
+                    remaining_spins = curr_spins
                 else:
                     await asyncio.sleep(delay=2)
                     return False

@@ -63,6 +63,7 @@ db.sqlite3-journal
 
 # DB
 sessions/
+sessions*
 
 # Flask stuff:
 instance/
