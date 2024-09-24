@@ -220,7 +220,7 @@ class Tapper:
                  logger.info(f"<light-yellow>{self.session_name}</light-yellow> Upgrade Boinker | Not enough coins | Status: <magenta>{resp.status}</magenta>")
                  return False
 
-             return False1
+             return False
          except Exception as e:
              self.error(f"Error occurred during upgrade boinker: {e}")
              return False
