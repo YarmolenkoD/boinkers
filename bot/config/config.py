@@ -29,7 +29,8 @@ class Settings(BaseSettings):
          'playCornBattle',
          'NBPSep',
          'inviteAFriend',
-         'MergePalsQuests'
+         'MergePalsQuests',
+         'playAAO'
     ]
 
     USE_PROXY_FROM_FILE: bool = True
