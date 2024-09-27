@@ -637,9 +637,19 @@ class Tapper:
                         await asyncio.sleep(delay=4)
 
                     upgrade_success = True
-                    while upgrade_success:
-                        upgrade_success = await self.upgrade_boinker(http_client=http_client)
-                        await asyncio.sleep(delay=3)
+                    tries = 2
+                    while upgrade_success and tries > 0:
+                        result = await self.upgrade_boinker(http_client=http_client)
+                        if not result:
+                            if tries == 0:
+                                upgrade_success = false
+                            else:
+                                user_info = await self.get_user_info(http_client=http_client)
+                                if user_info['currencySoft'] < 20000000:
+                                    tries -= 1
+                                else:
+                                    upgrade_success = false
+                        await asyncio.sleep(delay=random.randint(2, 4))
 
                 logger.info(f"<light-yellow>{self.session_name}</light-yellow> | 💤 sleep 30 minutes 💤")
                 await asyncio.sleep(delay=1800)
