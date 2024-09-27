@@ -338,7 +338,7 @@ class Tapper:
                     curr_friend_boinker_level = 0
                     already_claimed_reward_level = 0
 
-                    if 'completedBoinkers' in friend['boinkers']:
+                    if 'boinkers' in friend and 'completedBoinkers' in friend['boinkers']:
                         curr_friend_boinker_level = friend['boinkers']['completedBoinkers']
 
                     if curr_friend_boinker_level == 0:
