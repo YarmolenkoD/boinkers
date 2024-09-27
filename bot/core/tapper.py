@@ -486,7 +486,7 @@ class Tapper:
                         continue
 
                     logger.info(f"<light-yellow>{self.session_name}</light-yellow> | 💤 Waiting {seconds_to_allow_claim} seconds before claiming reward... 💤")
-                    await asyncio.sleep(seconds_to_allow_claim)
+                    await asyncio.sleep(delay=seconds_to_allow_claim)
 
                     try:
                         claim_url = f"https://boink.astronomica.io/api/rewardedActions/claimRewardedAction/{name_id}?p=android"
@@ -502,7 +502,7 @@ class Tapper:
                         logger.info(f"<light-yellow>{self.session_name}</light-yellow> | 😢 Error claiming reward for {name_id}: {claim_error}")
                         break
 
-                await asyncio.sleep(1)
+                await asyncio.sleep(delay=1)
 
         except Exception as error:
             logger.info(f"<light-yellow>{self.session_name}</light-yellow> | 😢 Error performing tasks: {error}")
@@ -516,7 +516,7 @@ class Tapper:
             logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Ad task {name_id} clicked successfully")
 
             logger.info(f"<light-yellow>{self.session_name}</light-yellow> | 💤 Sleep 5 seconds before close ad... 💤")
-            await asyncio.sleep(5)
+            await asyncio.sleep(delay=5)
 
             # Confirm ad watched
             ad_watched_url = "https://boink.astronomica.io/api/rewardedActions/ad-watched?p=android"
@@ -529,7 +529,7 @@ class Tapper:
                 seconds_to_allow_claim = action['secondsToAllowClaim'] + 5
 
             logger.info(f"<light-yellow>{self.session_name}</light-yellow> | 💤 Sleep {seconds_to_allow_claim} seconds before claiming ad reward... 💤")
-            await asyncio.sleep(seconds_to_allow_claim)
+            await asyncio.sleep(delay=seconds_to_allow_claim)
 
             # Claim the reward
             claim_url = f"https://boink.astronomica.io/api/rewardedActions/claimRewardedAction/{name_id}?p=android"
@@ -557,7 +557,7 @@ class Tapper:
         if settings.USE_RANDOM_DELAY_IN_RUN:
             random_delay = random.randint(settings.RANDOM_DELAY_IN_RUN[0], settings.RANDOM_DELAY_IN_RUN[1])
             logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Bot will start in <ly>{random_delay}s</ly>")
-            await asyncio.sleep(random_delay)
+            await asyncio.sleep(delay=random_delay)
 
         access_token = None
         refresh_token = None

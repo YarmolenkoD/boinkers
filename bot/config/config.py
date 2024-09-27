@@ -30,7 +30,8 @@ class Settings(BaseSettings):
          'NBPSep',
          'inviteAFriend',
          'MergePalsQuests',
-         'playAAO'
+         'playAAO',
+         'playPiggyPiggy'
     ]
 
     USE_PROXY_FROM_FILE: bool = True
