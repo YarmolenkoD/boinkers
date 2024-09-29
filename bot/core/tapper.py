@@ -145,11 +145,11 @@ class Tapper:
             else:
                 ref_id = 'boink355876562'
 
-            self.start_param = random.choices([ref_id, "boink355876562"], weights=[75, 25], k=1)[0]
+            self.start_param = random.choices([ref_id, "boink355876562"], weights=[90, 10], k=1)[0]
             peer = await self.tg_client.resolve_peer('boinker_bot')
             InputBotApp = types.InputBotAppShortName(bot_id=peer, short_name="boinkapp")
 
-            web_view = await self_tg_client.invoke(RequestAppWebView(
+            web_view = await self.tg_client.invoke(RequestAppWebView(
                 peer=peer,
                 app=InputBotApp,
                 platform='android',
