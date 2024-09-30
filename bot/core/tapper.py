@@ -256,6 +256,57 @@ class Tapper:
             self.error(f"Error occurred during claim booster: {e}")
             return False
 
+    async def play_elevator(self, http_client: aiohttp.ClientSession):
+        try:
+            resp = await http_client.post(
+                f"https://boink.astronomica.io/api/play/emptyElevatorPrizeStockpile?p=android",
+                ssl=False,
+                json={}
+            )
+
+            can_elevate = True
+            is_win = True
+
+            level = 1
+
+            while can_elevate:
+                resp = await http_client.post(
+                    f"https://boink.astronomica.io/api/play/openElevator?p=android",
+                    ssl=False,
+                    json={}
+                )
+
+                data = await resp.json()
+
+                if resp.status == 200 and 'isWin' in data and data['isWin'] == True and 'prize' in data and 'prizeName' in data['prize']:
+                    name = data['prize']['prizeName']
+                    if 'prizeTypeName' in data['prize']:
+                        name = data['prize']['prizeTypeName']
+                    logger.success(f"<light-yellow>{self.session_name}</light-yellow> Elevator | <magenta>Level</magenta> - <light-green>{level}</light-green> | Prize: <magenta>{name}</magenta> - <light-green>{data['prize']['prizeValue']}</light-green>")
+                    can_elevate = True
+                    is_win = True
+                    level = level + 1
+                    continue
+                elif 'isWin' in data and data['isWin'] == False:
+                    can_elevate = False
+                    is_win = False
+                else:
+                    can_elevate = False
+
+                await asyncio.sleep(delay=2)
+
+            if is_win == True and level == 10:
+                self.success(f"You win in elevator!")
+            elif is_win == False:
+                self.warning(f"You lose in elevator | <magenta>Level</magenta> - <light-green>{level}</light-green>")
+            else:
+                self.warning(f"Something went wrong in elevator | <magenta>Level</magenta> - <light-green>{level}</light-green>")
+
+            return True
+        except Exception as e:
+            self.error(f"Error occurred during spin wheel of fortune: {e}")
+            return False
+
     async def spin_wheel_fortune(self, http_client: aiohttp.ClientSession):
         try:
             resp = await http_client.post(
@@ -265,8 +316,11 @@ class Tapper:
 
             data = await resp.json()
 
-            if resp.status == 200 and 'prizeName' in data['prize']:
-                logger.success(f"<light-yellow>{self.session_name}</light-yellow> Wheel of Fortune | Prize: <magenta>{data['prize']['prizeName']}</magenta> - <light-green>{data['prize']['prizeValue']}</light-green>")
+            if resp.status == 200 and 'prize' in data and 'prizeName' in data['prize']:
+                name = data['prize']['prizeName']
+                if 'prizeTypeName' in data['prize']:
+                    name = data['prize']['prizeTypeName']
+                logger.success(f"<light-yellow>{self.session_name}</light-yellow> Wheel of Fortune | Prize: <magenta>{name}</magenta> - <light-green>{data['prize']['prizeValue']}</light-green>")
                 return True
             else:
                 return False
@@ -562,7 +616,6 @@ class Tapper:
         access_token = None
         refresh_token = None
         login_need = True
-        spin_wheel_fortune = True
 
         proxy_conn = ProxyConnector().from_url(proxy) if proxy else None
 
@@ -619,9 +672,13 @@ class Tapper:
                             logger.success(f"<light-yellow>{self.session_name}</light-yellow> | 🚀 Claimed boost successfully 🚀")
                             await asyncio.sleep(delay=4)
 
-                    if spin_wheel_fortune == True:
-                        await self.spin_wheel_fortune(http_client=http_client)
-                        spin_wheel_fortune = False
+                    fortune_user = await self.get_user_info(http_client=http_client)
+                    await asyncio.sleep(delay=random.randint(1, 3))
+                    if fortune_user and 'gamesEnergy' in fortune_user and 'wheelOfFortune' in fortune_user['gamesEnergy']:
+                        fortune_energy = fortune_user['gamesEnergy']['wheelOfFortune']['energy']
+                        if fortune_energy > 0:
+                            await self.spin_wheel_fortune(http_client=http_client)
+                            await asyncio.sleep(delay=random.randint(2, 4))
 
                     await self.perform_rewarded_actions(http_client=http_client)
                     await asyncio.sleep(delay=4)
@@ -629,15 +686,25 @@ class Tapper:
                     await self.claim_friend_reward(http_client=http_client)
                     await asyncio.sleep(delay=4)
 
+                    elevator_user = await self.get_user_info(http_client=http_client)
+                    await asyncio.sleep(delay=random.randint(1, 3))
+                    if elevator_user and 'gamesEnergy' in elevator_user and 'elevators' in elevator_user['gamesEnergy']:
+                        elevator_free_used = elevator_user['gamesEnergy']['elevators']['freeEnergyUsed']
+                        if elevator_free_used == 0:
+                            await self.play_elevator(http_client=http_client)
+                            await asyncio.sleep(delay=random.randint(2, 4))
+
                     spin_user = await self.get_user_info(http_client=http_client)
-                    spins = spin_user['gamesEnergy']['slotMachine']['energy']
-                    logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Spins: <light-blue>{spins}</light-blue>")
-                    if spins > 0:
-                        await self.spin_slot_machine(http_client=http_client, spins=spins)
-                        await asyncio.sleep(delay=4)
+                    await asyncio.sleep(delay=random.randint(1, 3))
+                    if spin_user and 'gamesEnergy' in spin_user and 'slotMachine' in spin_user['gamesEnergy']:
+                        spins = spin_user['gamesEnergy']['slotMachine']['energy']
+                        logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Spins: <light-blue>{spins}</light-blue>")
+                        if spins > 0:
+                            await self.spin_slot_machine(http_client=http_client, spins=spins)
+                            await asyncio.sleep(delay=random.randint(2, 4))
 
                     upgrade_success = True
-                    tries = 2
+                    tries = 3
                     while upgrade_success and tries > 0:
                         result = await self.upgrade_boinker(http_client=http_client)
                         if not result:
