@@ -36,6 +36,12 @@ class Settings(BaseSettings):
 
     USE_PROXY_FROM_FILE: bool = True
 
+    ENABLE_AUTO_TASKS: bool = True
+    ENABLE_AUTO_WHEEL_FORTUNE: bool = True
+    ENABLE_AUTO_ELEVATOR: bool = True
+    ENABLE_AUTO_SPIN: bool = True
+    ENABLE_AUTO_UPGRADE: bool = True
+
 
 settings = Settings()
 
