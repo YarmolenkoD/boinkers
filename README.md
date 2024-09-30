@@ -31,6 +31,7 @@
 |                     Auto tasks                     |     ✅     |
 |                Auto upgrade boinker                |     ✅     |
 |             Auto spin wheel of fortune             |     ✅     |
+|                   Auto elevator                    |     ✅     |
 |           Support for pyrogram .session            |     ✅     |
 
 
