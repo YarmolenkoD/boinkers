@@ -666,7 +666,8 @@ class Tapper:
                 user_info = await self.get_user_info(http_client=http_client)
                 await asyncio.sleep(delay=2)
                 if user_info is not None:
-                    logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Boinkers: <light-blue>{user_info['boinkers']['completedBoinkers']}</light-blue> 👨‍🚀")
+                    if user_info['boinkers'] and 'completedBoinkers' in user_info['boinkers']:
+                        logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Boinkers: <light-blue>{user_info['boinkers']['completedBoinkers']}</light-blue> 👨‍🚀")
 
                     if 'currencySoft' in user_info:
                         logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Coin Balance: 💰 <light-green>{'{:,}'.format(user_info['currencySoft'])}</light-green> 💰")
