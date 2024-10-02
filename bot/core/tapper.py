@@ -266,10 +266,11 @@ class Tapper:
 
             can_elevate = True
             is_win = True
+            max_level = settings.ELEVATOR_MAX_LEVEL
 
-            level = 1
+            completed_level = 0
 
-            while can_elevate:
+            while can_elevate and completed_level < max_level:
                 resp = await http_client.post(
                     f"https://boink.astronomica.io/api/play/openElevator?p=android",
                     ssl=False,
@@ -279,28 +280,40 @@ class Tapper:
                 data = await resp.json()
 
                 if resp.status == 200 and 'isWin' in data and data['isWin'] == True and 'prize' in data and 'prizeName' in data['prize']:
+                    completed_level = completed_level + 1
                     name = data['prize']['prizeName']
                     if 'prizeTypeName' in data['prize']:
                         name = data['prize']['prizeTypeName']
-                    logger.success(f"<light-yellow>{self.session_name}</light-yellow> Elevator | <magenta>Level</magenta> - <light-green>{level}</light-green> | Prize: <magenta>{name}</magenta> - <light-green>{data['prize']['prizeValue']}</light-green>")
+                    logger.success(f"<light-yellow>{self.session_name}</light-yellow> Elevator | <magenta>Level</magenta> - <light-green>{completed_level}</light-green> | Prize: <magenta>{name}</magenta> - <light-green>{data['prize']['prizeValue']}</light-green>")
                     can_elevate = True
                     is_win = True
-                    level = level + 1
                     continue
                 elif 'isWin' in data and data['isWin'] == False:
                     can_elevate = False
                     is_win = False
+                    completed_level = completed_level + 1
                 else:
                     can_elevate = False
+                    is_win = False
+                    completed_level = completed_level + 1
 
                 await asyncio.sleep(delay=2)
 
-            if is_win == True and level == 10:
-                self.success(f"You win in elevator!")
+            if is_win == True:
+                res = await http_client.post(
+                    f"https://boink.astronomica.io/api/play/quitAndCollect?p=android",
+                    ssl=False,
+                    json={}
+                )
+
+                if res.status == 200:
+                    self.success(f"You win in elevator | <magenta>Level</magenta> - <light-green>{completed_level}</light-green>")
+                else:
+                    self.warning(f"You lose in elevator | <magenta>Level</magenta> - <yellow>{completed_level}</yellow>")
             elif is_win == False:
-                self.warning(f"You lose in elevator | <magenta>Level</magenta> - <light-green>{level}</light-green>")
+                self.warning(f"You lose in elevator | <magenta>Level</magenta> - <yellow>{completed_level}</yellow>")
             else:
-                self.warning(f"Something went wrong in elevator | <magenta>Level</magenta> - <light-green>{level}</light-green>")
+                self.warning(f"Something went wrong in elevator | <magenta>Level</magenta> - <yellow>{completed_level}</yellow>")
 
             return True
         except Exception as e:
@@ -653,7 +666,8 @@ class Tapper:
                 user_info = await self.get_user_info(http_client=http_client)
                 await asyncio.sleep(delay=2)
                 if user_info is not None:
-                    logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Level: 🚀 <light-blue>{'{:,}'.format(user_info['boinkers']['currentBoinkerProgression']['level'])}</light-blue> 🚀")
+                    logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Boinkers: <light-blue>{user_info['boinkers']['completedBoinkers']}</light-blue> 👨‍🚀")
+
                     if 'currencySoft' in user_info:
                         logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Coin Balance: 💰 <light-green>{'{:,}'.format(user_info['currencySoft'])}</light-green> 💰")
 
@@ -692,8 +706,13 @@ class Tapper:
                         elevator_user = await self.get_user_info(http_client=http_client)
                         await asyncio.sleep(delay=random.randint(1, 3))
                         if elevator_user and 'gamesEnergy' in elevator_user and 'elevators' in elevator_user['gamesEnergy']:
-                            elevator_free_used = elevator_user['gamesEnergy']['elevators']['freeEnergyUsed']
-                            if elevator_free_used == 0:
+                            elevator_last_used = elevator_user['gamesEnergy']['elevators']['lastUpdated']
+
+                            parsed_date = datetime.strptime(elevator_last_used, "%Y-%m-%dT%H:%M:%S.%fZ")
+                            now = datetime.utcnow()
+                            one_day_ago = now - timedelta(days=1)
+
+                            if parsed_date < one_day_ago:
                                 await self.play_elevator(http_client=http_client)
                                 await asyncio.sleep(delay=random.randint(2, 4))
 

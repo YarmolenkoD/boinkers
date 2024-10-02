@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     ENABLE_AUTO_TASKS: bool = True
     ENABLE_AUTO_WHEEL_FORTUNE: bool = True
     ENABLE_AUTO_ELEVATOR: bool = True
+    ELEVATOR_MAX_LEVEL: int = 4
     ENABLE_AUTO_SPIN: bool = True
     ENABLE_AUTO_UPGRADE: bool = True
 
