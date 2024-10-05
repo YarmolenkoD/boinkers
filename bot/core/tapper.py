@@ -155,7 +155,7 @@ class Tapper:
                 platform='android',
                 write_allowed=True,
                 start_param=self.start_param
-            ), self)
+            ))
 
             auth_url = web_view.url
 
@@ -277,9 +277,14 @@ class Tapper:
                     json={}
                 )
 
-                data = await resp.json()
+                data = None
 
-                if resp.status == 200 and 'isWin' in data and data['isWin'] == True and 'prize' in data and 'prizeName' in data['prize']:
+                if resp.status == 200:
+                    data = await resp.json()
+                else:
+                    return None
+
+                if data and resp.status == 200 and 'isWin' in data and data['isWin'] == True and 'prize' in data and 'prizeName' in data['prize']:
                     completed_level = completed_level + 1
                     name = data['prize']['prizeName']
                     if 'prizeTypeName' in data['prize']:
@@ -288,7 +293,7 @@ class Tapper:
                     can_elevate = True
                     is_win = True
                     continue
-                elif 'isWin' in data and data['isWin'] == False:
+                elif data and 'isWin' in data and data['isWin'] == False:
                     can_elevate = False
                     is_win = False
                     completed_level = completed_level + 1
@@ -317,7 +322,7 @@ class Tapper:
 
             return True
         except Exception as e:
-            self.error(f"Error occurred during spin wheel of fortune: {e}")
+            self.error(f"Error occurred during elevator: {e}")
             return False
 
     async def spin_wheel_fortune(self, http_client: aiohttp.ClientSession):
