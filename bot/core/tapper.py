@@ -225,13 +225,13 @@ class Tapper:
              self.error(f"Error occurred during upgrade boinker: {e}")
              return False
 
-    async def claim_booster(self, http_client: aiohttp.ClientSession, spin: int):
+    async def claim_booster(self, http_client: aiohttp.ClientSession, spin: int, multiplier: int = 0):
         json_data = {
-            'multiplier': 2,
+            'multiplier': multiplier,
             'optionNumber': 1
         }
 
-        if spin > 30:
+        if spin > 30 and multiplier == 0:
             json_data = {
                 'multiplier': 2,
                 'optionNumber': 3
@@ -387,8 +387,11 @@ class Tapper:
                  f"https://boink.astronomica.io/api/users/me?p=android",
                  ssl=False
             )
-            json = await resp.json()
-            return json
+            if resp.status == 200:
+                json = await resp.json()
+                return json
+            else:
+                return None
         except Exception as e:
             self.error(f"Error occurred during getting user info: {e}")
             return None
@@ -397,12 +400,15 @@ class Tapper:
         try:
             current_user_info = await self.get_user_info(http_client=http_client)
 
-            if 'friendsInvited' in current_user_info:
+            if current_user_info and 'friendsInvited' in current_user_info:
                 friends_invited = current_user_info['friendsInvited']
                 invited_friends_data = {}
 
                 if 'invitedFriendsData' in current_user_info:
                     invited_friends_data = current_user_info['invitedFriendsData']
+
+                if not friends_invited:
+                    return None
 
                 for friend in friends_invited:
                     curr_friend_id = friend['_id']
@@ -410,13 +416,13 @@ class Tapper:
                     curr_friend_boinker_level = 0
                     already_claimed_reward_level = 0
 
-                    if 'boinkers' in friend and 'completedBoinkers' in friend['boinkers']:
+                    if friend and 'boinkers' in friend and 'completedBoinkers' in friend['boinkers']:
                         curr_friend_boinker_level = friend['boinkers']['completedBoinkers']
 
                     if curr_friend_boinker_level == 0:
                         continue
 
-                    if curr_friend_id in invited_friends_data:
+                    if invited_friends_data and curr_friend_id in invited_friends_data:
                         already_claimed_reward_level = invited_friends_data[curr_friend_id]['moonBoinkersRewardClaimed'] or 0
 
                         if already_claimed_reward_level == 1 and curr_friend_boinker_level >= 2 and curr_friend_boinker_level < 3:
@@ -493,7 +499,7 @@ class Tapper:
                 can_perform_task = True
                 wait_time = None
 
-                if user_info.get('rewardedActions', {}).get(name_id):
+                if user_info and user_info.get('rewardedActions', {}).get(name_id):
                     last_claim_time = None
                     last_click_time = None
                     next_available_time = None
@@ -579,6 +585,28 @@ class Tapper:
         except Exception as error:
             logger.info(f"<light-yellow>{self.session_name}</light-yellow> | 😢 Error performing tasks: {error}")
 
+    async def get_raffle_data(self, http_client: aiohttp.ClientSession, name_id, provider_id, action):
+        try:
+            raffle_url = f"https://boink.astronomica.io/api/raffle/getRafflesData?p=android"
+
+            result = await http_client.get(raffle_url, ssl=False)
+
+            data = await result.json()
+
+            if result.status == 200 and data:
+                current_raffle = data.get('currentRaffle', None)
+                user_daily_poop = data.get('userDailyPoop', 0)
+                user_raffle_data = data.get('userRaffleData', None)
+
+                return user_raffle_data, user_daily_poop, current_raffle
+            else:
+                self.warning(f"Something went wrong during get raffle data: {data}")
+                return None, None, None
+
+        except Exception as error:
+            self.error(f" 😢 Error during get raffle data: {error}")
+            return None, None, None
+
     async def handle_ad_task(self, http_client: aiohttp.ClientSession, name_id, provider_id, action):
         try:
             # Click the ad task
@@ -609,8 +637,9 @@ class Tapper:
             async with http_client.post(claim_url, headers=headers) as claim_response:
                 if claim_response.status == 200:
                     result = await claim_response.json()
-                    reward = result.get('prizeGotten')
-                    logger.success(f"<light-yellow>{self.session_name}</light-yellow> | Successfully completed ad task {name_id} | Reward: 💰<light-green>{reward}</light-green> 💰")
+                    if result:
+                        reward = result.get('prizeGotten')
+                        logger.success(f"<light-yellow>{self.session_name}</light-yellow> | Successfully completed ad task {name_id} | Reward: 💰<light-green>{reward}</light-green> 💰")
                 else:
                     logger.error(f"<light-yellow>{self.session_name}</light-yellow> | 😢 Failed to claim reward for ad task {name_id}. Status code: {claim_response.status}")
 
@@ -685,6 +714,16 @@ class Tapper:
                     last_claimed_time_str = user_info.get('boinkers', {}).get('booster', {}).get('x2', {}).get('lastTimeFreeOptionClaimed')
                     last_claimed_time = parser.isoparse(last_claimed_time_str) if last_claimed_time_str else None
 
+                    last_claimed_time_str_x29 = user_info.get('boinkers', {}).get('booster', {}).get('x29', {}).get('lastTimeFreeOptionClaimed')
+                    last_claimed_time_x29 = parser.isoparse(last_claimed_time_str_x29) if last_claimed_time_str_x29 else None
+
+                    # Check for booster x29 claim
+                    if not last_claimed_time_x29 or current_time > last_claimed_time_x29 + timedelta(hours=2, minutes=5):
+                        success = await self.claim_booster(http_client=http_client, spin=user_info['gamesEnergy']['slotMachine']['energy'], multiplier=29)
+                        if success:
+                            logger.success(f"<light-yellow>{self.session_name}</light-yellow> | 🚀 Claimed boost successfully 🚀")
+                            await asyncio.sleep(delay=4)
+
                     # Check for booster claim
                     if not last_claimed_time or current_time > last_claimed_time + timedelta(hours=2, minutes=5):
                         success = await self.claim_booster(http_client=http_client, spin=user_info['gamesEnergy']['slotMachine']['energy'])
@@ -697,7 +736,12 @@ class Tapper:
                         await asyncio.sleep(delay=random.randint(1, 3))
                         if fortune_user and 'gamesEnergy' in fortune_user and 'wheelOfFortune' in fortune_user['gamesEnergy']:
                             fortune_energy = fortune_user['gamesEnergy']['wheelOfFortune']['energy']
+                            last_claimed_wheel_str = user_info.get('boinkers', {}).get('booster', {}).get('x2', {}).get('lastTimeFreeOptionClaimed')
+                            last_claimed_wheel_time = parser.isoparse(last_claimed_wheel_str) if last_claimed_wheel_str else None
                             if fortune_energy > 0:
+                                await self.spin_wheel_fortune(http_client=http_client)
+                                await asyncio.sleep(delay=random.randint(2, 4))
+                            elif not last_claimed_wheel_time or current_time > last_claimed_wheel_time + timedelta(hours=24):
                                 await self.spin_wheel_fortune(http_client=http_client)
                                 await asyncio.sleep(delay=random.randint(2, 4))
 
@@ -727,11 +771,16 @@ class Tapper:
                         await asyncio.sleep(delay=random.randint(1, 3))
                         if spin_user and 'gamesEnergy' in spin_user and 'slotMachine' in spin_user['gamesEnergy']:
                             spins = spin_user['gamesEnergy']['slotMachine']['energy']
-                            logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Spins: <light-blue>{spins}</light-blue>")
+                            last_claimed_spins_str = user_info.get('boinkers', {}).get('booster', {}).get('x2', {}).get('lastTimeFreeOptionClaimed')
+                            last_claimed_spins_time = parser.isoparse(last_claimed_spins_str) if last_claimed_spins_str else None
                             if spins > 0:
+                                self.info(f"Spins: <light-blue>{spins}</light-blue>")
                                 await self.spin_slot_machine(http_client=http_client, spins=spins)
                                 await asyncio.sleep(delay=random.randint(2, 4))
-
+                            elif not last_claimed_spins_time or current_time > last_claimed_spins_time + timedelta(hours=14):
+                                self.info(f"Daily Spins: <light-blue>50</light-blue>")
+                                await self.spin_slot_machine(http_client=http_client, spins=50)
+                                await asyncio.sleep(delay=random.randint(2, 4))
 
                     if settings.ENABLE_AUTO_UPGRADE:
                         upgrade_success = True
@@ -740,13 +789,13 @@ class Tapper:
                             result = await self.upgrade_boinker(http_client=http_client)
                             if not result:
                                 if tries == 0:
-                                    upgrade_success = false
+                                    upgrade_success = False
                                 else:
                                     user_info = await self.get_user_info(http_client=http_client)
-                                    if user_info['currencySoft'] < 20000000:
+                                    if user_info and 'currencySoft' in user_info and user_info['currencySoft'] > 20000000:
                                         tries -= 1
                                     else:
-                                        upgrade_success = false
+                                        upgrade_success = False
                             await asyncio.sleep(delay=random.randint(2, 4))
 
                 logger.info(f"<light-yellow>{self.session_name}</light-yellow> | 💤 sleep 30 minutes 💤")
