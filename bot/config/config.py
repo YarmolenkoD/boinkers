@@ -31,7 +31,10 @@ class Settings(BaseSettings):
          'inviteAFriend',
          'MergePalsQuests',
          'playAAO',
-         'playPiggyPiggy'
+         'playPiggyPiggy',
+         'dailyVIPEnergyPerk',
+         'vipGoldPerk',
+         'dailyVIPWheelSpins',
     ]
 
     USE_PROXY_FROM_FILE: bool = True
