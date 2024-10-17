@@ -35,6 +35,8 @@ class Settings(BaseSettings):
          'dailyVIPEnergyPerk',
          'vipGoldPerk',
          'dailyVIPWheelSpins',
+         'foxCoinEnergy',
+         'DiamoreSep18',
     ]
 
     USE_PROXY_FROM_FILE: bool = True
