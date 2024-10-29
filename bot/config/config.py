@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     AD_TASK_PREFIX: str = 'AdTask'
 
     BLACK_LIST_TASKS: list[str] = [
+         'playSpell',
+         'playKolo',
+         'playAngryMiner',
+         'playJetton',
          'telegramShareStory',
          'emojiOnPostTelegramNewsChannel',
          'NotGoldReward',
