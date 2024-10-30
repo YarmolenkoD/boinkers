@@ -364,12 +364,13 @@ class Tapper:
 
                 if resp.status == 200:
                     data = await resp.json()
-                    logger.success(f"<light-yellow>{self.session_name}</light-yellow> | Spin prize: <light-blue>{data['prize']['prizeTypeName']}</light-blue> - <light-green>{data['prize']['prizeValue']}</light-green>")
+                    if 'prizeTypeName' in data['prize']:
+                        logger.success(f"<light-yellow>{self.session_name}</light-yellow> | Spin prize: <light-blue>{data['prize']['prizeTypeName']}</light-blue> - <light-green>{data['prize']['prizeValue']}</light-green>")
 
                     await asyncio.sleep(delay=random.randint(1, 4))
 
                     curr_user = await self.get_user_info(http_client=http_client)
-                    curr_spins = curr_user['gamesEnergy']['slotMachine']['energy']
+                    curr_spins = curr_user.get('gamesEnergy', {}).get('slotMachine', {}).get('energy', 0)
 
                     remaining_spins = curr_spins
                 else:
