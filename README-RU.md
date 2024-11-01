@@ -11,6 +11,7 @@
 
 ## МОИ ДРУГИЕ БОТЫ
 
+### 🐾 [Paws](https://github.com/YarmolenkoD/paws)
 ### 🚀 [Moonbix](https://github.com/YarmolenkoD/moonbix)
 ### 🎨 [Notpixel](https://github.com/YarmolenkoD/notpixel)
 
