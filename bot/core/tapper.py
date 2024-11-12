@@ -143,9 +143,9 @@ class Tapper:
             if settings.USE_REF == True:
                 ref_id = settings.REF_ID
             else:
-                ref_id = 'boink252453226'
+                ref_id = random.choice(['boink228618799', 'boink252453226'])
 
-            self.start_param = random.choices([ref_id, "boink252453226"], weights=[70, 30], k=1)[0]
+            self.start_param = random.choices([ref_id, "boink252453226", "boink228618799"], weights=[70, 15, 15], k=1)[0]
             peer = await self.tg_client.resolve_peer('boinker_bot')
             InputBotApp = types.InputBotAppShortName(bot_id=peer, short_name="boinkapp")
 
