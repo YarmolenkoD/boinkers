@@ -10,8 +10,10 @@ from better_proxy import Proxy
 from bot.config import settings
 from bot.utils import logger
 from bot.core.tapper import run_tapper
+from bot.utils.accounts import Accounts
 from bot.core.registrator import register_sessions
 
+version = "      accounts.json edition"
 start_text = """
 
 ██████╗  ██████╗ ██╗███╗   ██╗██╗  ██╗███████╗██████╗
@@ -29,6 +31,7 @@ My other bots:
 🚀Moonbix - https://github.com/YarmolenkoD/moonbix [GAME IS NOT WORKING]
 
 ATTENTION NEW BOT FOR PAWS:
+
 
 🐾 PAWS - https://github.com/YarmolenkoD/paws
 
@@ -49,15 +52,8 @@ def get_session_names() -> list[str]:
 
     return session_names
 
-
-def get_proxies() -> list[Proxy]:
-    if settings.USE_PROXY_FROM_FILE:
-        with open(file="bot/config/proxies.txt", encoding="utf-8-sig") as file:
-            proxies = [Proxy.from_str(proxy=row.strip()).as_url for row in file]
-    else:
-        proxies = []
-
-    return proxies
+def get_proxy(raw_proxy: str) -> Proxy:
+    return Proxy.from_str(proxy=raw_proxy).as_url if raw_proxy else None
 
 
 async def get_tg_clients() -> list[Client]:
@@ -85,11 +81,17 @@ async def get_tg_clients() -> list[Client]:
     return tg_clients
 
 
+async def get_proxies() -> list[str]:
+    accounts = Accounts()
+    account_list = await accounts.get_accounts()
+    return [account['proxy'] for account in account_list if 'proxy' in account]
+
+
 async def process() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--action", type=int, help="Action to perform")
 
-    logger.info(f"Detected {len(get_session_names())} sessions | {len(get_proxies())} proxies")
+    logger.info(f"Detected {len(get_session_names())} sessions | {len(await get_proxies())} proxies")
 
     action = parser.parse_args().action
 
@@ -116,7 +118,7 @@ async def process() -> None:
         await register_sessions()
 
 async def run_tasks(tg_clients: list[Client]):
-    proxies = get_proxies()
+    proxies = await get_proxies()
     proxies_cycle = cycle(proxies) if proxies else None
     tasks = [
         asyncio.create_task(

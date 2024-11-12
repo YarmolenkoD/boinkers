@@ -1,3 +1,4 @@
+from typing import ClassVar
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
@@ -7,10 +8,12 @@ class Settings(BaseSettings):
     API_HASH: str
 
     USE_REF: bool = True
-    REF_ID: str = 'boink355876562'
+    REF_ID: str = 'boink252453226'
 
     USE_RANDOM_DELAY_IN_RUN: bool = True
     RANDOM_DELAY_IN_RUN: list[int] = [5, 60]
+
+    PROXY_TYPE: ClassVar[str] = 'socks5'
 
     AD_TASK_PREFIX: str = 'AdTask'
 

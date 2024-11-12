@@ -16,14 +16,14 @@ from pyrogram import Client
 from pyrogram.errors import Unauthorized, UserDeactivated, AuthKeyUnregistered, FloodWait
 from pyrogram.raw.functions.messages import RequestAppWebView
 from pyrogram.raw import types
-from .agents import generate_random_user_agent
-from bot.config import settings
+from bot.core.agents import generate_random_user_agent
+from bot.core.headers import headers
+from bot.core.helper import format_duration
 
 from bot.utils import logger
 from bot.utils.logger import SelfTGClient
 from bot.exceptions import InvalidSession
-from .headers import headers
-from .helper import format_duration
+from bot.config import settings
 
 self_tg_client = SelfTGClient()
 
@@ -143,9 +143,9 @@ class Tapper:
             if settings.USE_REF == True:
                 ref_id = settings.REF_ID
             else:
-                ref_id = 'boink355876562'
+                ref_id = 'boink252453226'
 
-            self.start_param = random.choices([ref_id, "boink355876562"], weights=[90, 10], k=1)[0]
+            self.start_param = random.choices([ref_id, "boink252453226"], weights=[70, 30], k=1)[0]
             peer = await self.tg_client.resolve_peer('boinker_bot')
             InputBotApp = types.InputBotAppShortName(bot_id=peer, short_name="boinkapp")
 
@@ -655,7 +655,23 @@ class Tapper:
         except Exception as error:
             logger.error(f"<light-yellow>{self.session_name}</light-yellow> | Proxy: {proxy} | 😢 Error: {error}")
 
-    async def run(self, proxy: str | None) -> None:
+    async def run(self, proxy):
+        if proxy:
+            print(f"Proxy string: {proxy}")
+            print(f"Split parts: {proxy.split(':')}")
+            # Разделяем строку на части
+            parts = proxy.split(':')
+            if len(parts) == 4:  # формат username:password:host:port
+                username, password, host, port = parts
+                proxy = f"http://{username}:{password}@{host}:{port}"
+            elif len(parts) == 3:  # формат username:host:port
+                username, host, port = parts
+                proxy = f"http://{username}@{host}:{port}"
+            else:
+                raise ValueError("Неверный формат прокси. Ожидается 'username:host:port' или 'username:password:host:port'")
+            
+        proxy_conn = ProxyConnector().from_url(proxy) if proxy else None
+
         if settings.USE_RANDOM_DELAY_IN_RUN:
             random_delay = random.randint(settings.RANDOM_DELAY_IN_RUN[0], settings.RANDOM_DELAY_IN_RUN[1])
             logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Bot will start in <ly>{random_delay}s</ly>")
@@ -664,8 +680,6 @@ class Tapper:
         access_token = None
         refresh_token = None
         login_need = True
-
-        proxy_conn = ProxyConnector().from_url(proxy) if proxy else None
 
         http_client = CloudflareScraper(headers=headers, connector=proxy_conn)
 
