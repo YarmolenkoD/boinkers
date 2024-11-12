@@ -1,19 +1,8 @@
-[![Static Badge](https://img.shields.io/badge/Telegram-Channel-Link?style=for-the-badge&logo=Telegram&logoColor=white&logoSize=auto&color=blue)](https://t.me/hidden_coding)
-
-[![Static Badge](https://img.shields.io/badge/Telegram-Chat-yes?style=for-the-badge&logo=Telegram&logoColor=white&logoSize=auto&color=blue)](https://t.me/hidden_codding_chat)
-
-[![Static Badge](https://img.shields.io/badge/Telegram-Bot%20Link-Link?style=for-the-badge&logo=Telegram&logoColor=white&logoSize=auto&color=blue)](https://t.me/boinker_bot/boinkapp?startapp=boink355876562)
 
 # 💩 АВТО ФАРМ ДЛЯ BOINKERS 💩
 
 > [!WARNING]
 > Я не несу ответственности за ваш аккаунт. Пожалуйста, учитывайте потенциальные риски перед использованием этого бота.
-
-## МОИ ДРУГИЕ БОТЫ
-
-### 🐾 [Paws](https://github.com/YarmolenkoD/paws)
-### 🚀 [Moonbix](https://github.com/YarmolenkoD/moonbix)
-### 🎨 [Notpixel](https://github.com/YarmolenkoD/notpixel)
 
 ## Рекомендация перед использованием
 
@@ -36,7 +25,7 @@
 |          Поддержка pyrogram .session           |       ✅        |
 
 
-## [Настройки](https://github.com/YarmolenkoD/boinkers/blob/main/.env-example/)
+## [Настройки](https://github.com/Mffff4/boinkers/blob/main/.env-example/)
 |           Настройки           |                                      Описание                                       |
 |:-----------------------------:|:-----------------------------------------------------------------------------------:|
 |     **API_ID / API_HASH**     | Данные платформы, с которой будет запущена сессия Telegram (по умолчанию - android) |
@@ -60,9 +49,9 @@
 3. Запишите `API_ID` и `API_HASH` в файле `.env`, предоставленные после регистрации вашего приложения.
 
 ## Установка
-Вы можете скачать [**Репозиторий**](https://github.com/YarmolenkoD/boinkers) клонированием на вашу систему и установкой необходимых зависимостей:
+Вы можете скачать [**Репозиторий**](https://github.com/Mffff4/boinkers) клонированием на вашу систему и установкой необходимых зависимостей:
 ```shell
-git clone https://github.com/YarmolenkoD/boinkers.git
+git clone https://github.com/Mffff4/boinkers.git
 cd boinkers
 ```
 

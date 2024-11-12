@@ -1,7 +1,7 @@
 version: '3'
 services:
   bot:
-    container_name: 'ИМЯ РЕПЫ'
+    container_name: 'boinkers'
     build:
       context: .
     stop_signal: SIGINT
