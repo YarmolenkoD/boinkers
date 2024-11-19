@@ -23,17 +23,6 @@ start_text = """
 ██████╔╝╚██████╔╝██║██║ ╚████║██║  ██╗███████╗██║  ██║
 ╚═════╝  ╚═════╝ ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝
 
-⭐️Github - https://github.com/YarmolenkoD/boinkers
-
-My other bots:
-
-🎨Not Pixel - https://github.com/YarmolenkoD/notpixel
-🚀Moonbix - https://github.com/YarmolenkoD/moonbix [GAME IS NOT WORKING]
-
-ATTENTION NEW BOT FOR PAWS:
-
-
-🐾 PAWS - https://github.com/YarmolenkoD/paws
 
 Select an action:
 
