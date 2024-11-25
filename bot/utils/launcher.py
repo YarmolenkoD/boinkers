@@ -107,13 +107,15 @@ async def process() -> None:
         await register_sessions()
 
 async def run_tasks(tg_clients: list[Client]):
-    proxies = await get_proxies()
-    proxies_cycle = cycle(proxies) if proxies else None
+    accounts = await Accounts().get_accounts()
+
+    session_proxies = {account["session_name"]: account.get("proxy", None) for account in accounts}
+
     tasks = [
         asyncio.create_task(
             run_tapper(
                 tg_client=tg_client,
-                proxy=next(proxies_cycle) if proxies_cycle else None,
+                proxy=session_proxies.get(tg_client.name, None),
             )
         )
         for tg_client in tg_clients
