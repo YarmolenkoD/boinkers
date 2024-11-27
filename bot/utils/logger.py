@@ -6,33 +6,41 @@ from loguru import logger
 from pyrogram.raw.functions.messages import RequestAppWebView
 
 logger.remove()
-logger.add(sink=sys.stdout, format="<white>{time:YYYY-MM-DD HH:mm:ss}</white>"
-                                   " | <level>{level}</level>"
-                                   " | <white><b>{message}</b></white>")
-logger = logger.opt(colors=True)
+logger.add(
+    sink=sys.stdout,
+    format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {message}",
+    colorize=True
+)
+logger = logger.opt(colors=True, ansi=True)
 
 
-def info(text):
+def info(text, proxy_ip=None):
+    if proxy_ip:
+        return logger.info(f"{text} | bind {proxy_ip}")
     return logger.info(text)
 
 
-def debug(text):
-    return logger.debug(text)
-
-
-def warning(text):
+def warning(text, proxy_ip=None):
+    if proxy_ip:
+        return logger.warning(f"{text} | bind {proxy_ip}")
     return logger.warning(text)
 
 
-def error(text):
+def error(text, proxy_ip=None):
+    if proxy_ip:
+        return logger.error(f"{text} | bind {proxy_ip}")
     return logger.error(text)
 
 
-def critical(text):
+def critical(text, proxy_ip=None):
+    if proxy_ip:
+        return logger.critical(f"{text} | bind {proxy_ip}")
     return logger.critical(text)
 
 
-def success(text):
+def success(text, proxy_ip=None):
+    if proxy_ip:
+        return logger.success(f"{text} | bind {proxy_ip}")
     return logger.success(text)
 
 def get_session_names() -> list[str]:
@@ -73,3 +81,6 @@ async def invoke_web_view(data, self):
 class SelfTGClient:
     async def invoke(_, data, self):
         return await invoke_web_view(data, self)
+
+def debug(text, proxy_ip=None):
+    pass

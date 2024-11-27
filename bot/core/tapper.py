@@ -16,14 +16,14 @@ from pyrogram import Client
 from pyrogram.errors import Unauthorized, UserDeactivated, AuthKeyUnregistered, FloodWait
 from pyrogram.raw.functions.messages import RequestAppWebView
 from pyrogram.raw import types
-from .agents import generate_random_user_agent
-from bot.config import settings
+from bot.core.agents import generate_random_user_agent
+from bot.core.headers import headers
+from bot.core.helper import format_duration
 
 from bot.utils import logger
 from bot.utils.logger import SelfTGClient
 from bot.exceptions import InvalidSession
-from .headers import headers
-from .helper import format_duration
+from bot.config import settings
 
 self_tg_client = SelfTGClient()
 
@@ -143,9 +143,9 @@ class Tapper:
             if settings.USE_REF == True:
                 ref_id = settings.REF_ID
             else:
-                ref_id = 'boink355876562'
+                ref_id = random.choice(['boink228618799', 'boink252453226'])
 
-            self.start_param = random.choices([ref_id, "boink355876562"], weights=[90, 10], k=1)[0]
+            self.start_param = random.choices([ref_id, "boink252453226", "boink228618799"], weights=[70, 15, 15], k=1)[0]
             peer = await self.tg_client.resolve_peer('boinker_bot')
             InputBotApp = types.InputBotAppShortName(bot_id=peer, short_name="boinkapp")
 
@@ -488,12 +488,9 @@ class Tapper:
 
                 is_exist_in_black_list = any(item.lower() in name_id.lower() for item in skipped_tasks)
                 if is_exist_in_black_list:
-#                     logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Skipping task: {name_id} | Because it's on the blacklist")
                     continue
 
-                # Skip all tasks that have conditions to join a telegram channel or group
                 if 'verification' in action and 'paramKey' in action['verification'] and action['verification']['paramKey'] == 'joinedChat':
-#                     logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Skipping task: {name_id} | Because you need to join the group or channel.")
                     continue
 
                 current_time = datetime.now(timezone.utc)
@@ -610,7 +607,6 @@ class Tapper:
 
     async def handle_ad_task(self, http_client: aiohttp.ClientSession, name_id, provider_id, action):
         try:
-            # Click the ad task
             click_url = f"https://boink.astronomica.io/api/rewardedActions/rewardedActionClicked/{name_id}?p=android"
             await http_client.post(click_url, ssl=False)
 
@@ -619,7 +615,6 @@ class Tapper:
             logger.info(f"<light-yellow>{self.session_name}</light-yellow> | 💤 Sleep 5 seconds before close ad... 💤")
             await asyncio.sleep(delay=5)
 
-            # Confirm ad watched
             ad_watched_url = "https://boink.astronomica.io/api/rewardedActions/ad-watched?p=android"
             await http_client.post(ad_watched_url, json={"providerId": provider_id}, ssl=False)
             logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Ad task {name_id} watched successfully")
@@ -632,7 +627,6 @@ class Tapper:
             logger.info(f"<light-yellow>{self.session_name}</light-yellow> | 💤 Sleep {seconds_to_allow_claim} seconds before claiming ad reward... 💤")
             await asyncio.sleep(delay=seconds_to_allow_claim)
 
-            # Claim the reward
             claim_url = f"https://boink.astronomica.io/api/rewardedActions/claimRewardedAction/{name_id}?p=android"
             logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Sending reward claim request for ad task {name_id}...")
             async with http_client.post(claim_url, headers=headers) as claim_response:
@@ -655,17 +649,33 @@ class Tapper:
         except Exception as error:
             logger.error(f"<light-yellow>{self.session_name}</light-yellow> | Proxy: {proxy} | 😢 Error: {error}")
 
-    async def run(self, proxy: str | None) -> None:
+    async def run(self, proxy):
+        if proxy:
+            parts = proxy.split(':')
+            if len(parts) == 4:
+                username, password, host, port = parts
+                proxy_str = f"http://{username}:{password}@{host}:{port}"
+                proxy_ip = f"{host}:{port}"
+            elif len(parts) == 3:
+                username, host, port = parts
+                proxy_str = f"http://{username}@{host}:{port}"
+                proxy_ip = f"{host}:{port}"
+            else:
+                raise ValueError("Неверный формат прокси. Ожидается 'username:host:port' или 'username:password:host:port'")
+        else:
+            proxy_str = None
+            proxy_ip = None
+            
+        proxy_conn = ProxyConnector().from_url(proxy_str) if proxy_str else None
+
         if settings.USE_RANDOM_DELAY_IN_RUN:
             random_delay = random.randint(settings.RANDOM_DELAY_IN_RUN[0], settings.RANDOM_DELAY_IN_RUN[1])
-            logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Bot will start in <ly>{random_delay}s</ly>")
+            logger.info(f"<light-yellow>{self.session_name}</light-yellow> | {proxy_ip if proxy_ip else 'No proxy'} | Bot will start in <ly>{random_delay}s</ly>")
             await asyncio.sleep(delay=random_delay)
 
         access_token = None
         refresh_token = None
         login_need = True
-
-        proxy_conn = ProxyConnector().from_url(proxy) if proxy else None
 
         http_client = CloudflareScraper(headers=headers, connector=proxy_conn)
 
@@ -711,21 +721,18 @@ class Tapper:
                         logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Shit Balance: 💩 <cyan>{'{:,.3f}'.format(user_info['currencyCrypto'])}</cyan> 💩")
 
                     current_time = datetime.now(timezone.utc)
-
                     last_claimed_time_str = user_info.get('boinkers', {}).get('booster', {}).get('x2', {}).get('lastTimeFreeOptionClaimed')
                     last_claimed_time = parser.isoparse(last_claimed_time_str) if last_claimed_time_str else None
 
                     last_claimed_time_str_x29 = user_info.get('boinkers', {}).get('booster', {}).get('x29', {}).get('lastTimeFreeOptionClaimed')
                     last_claimed_time_x29 = parser.isoparse(last_claimed_time_str_x29) if last_claimed_time_str_x29 else None
 
-                    # Check for booster x29 claim
                     if not last_claimed_time_x29 or current_time > last_claimed_time_x29 + timedelta(hours=2, minutes=5):
                         success = await self.claim_booster(http_client=http_client, spin=user_info['gamesEnergy']['slotMachine']['energy'], multiplier=29)
                         if success:
                             logger.success(f"<light-yellow>{self.session_name}</light-yellow> | 🚀 Claimed boost successfully 🚀")
                             await asyncio.sleep(delay=4)
 
-                    # Check for booster claim
                     if not last_claimed_time or current_time > last_claimed_time + timedelta(hours=2, minutes=5):
                         success = await self.claim_booster(http_client=http_client, spin=user_info['gamesEnergy']['slotMachine']['energy'])
                         if success:
